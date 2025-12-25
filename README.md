@@ -4,6 +4,7 @@
 [![Latest Stable Version](https://poser.pugx.org/henryejemuta/php-clubkash-vtu/v/stable)](https://packagist.org/packages/henryejemuta/php-clubkash-vtu)
 [![Total Downloads](https://poser.pugx.org/henryejemuta/php-clubkash-vtu/downloads)](https://packagist.org/packages/henryejemuta/php-clubkash-vtu)
 [![License](https://poser.pugx.org/henryejemuta/php-clubkash-vtu/license)](https://packagist.org/packages/henryejemuta/php-clubkash-vtu)
+[![Quality Score](https://img.shields.io/scrutinizer/g/henryejemuta/php-clubkash-vtu.svg?style=flat-square)](https://scrutinizer-ci.com/g/henryejemuta/php-clubkash-vtu)
 
 A robust PHP package for integrating with the ClubKash (Nellobytes Systems) VTU API. This package allows you to easily purchase airtime, data, cable TV, and electricity tokens.
 
@@ -29,15 +30,31 @@ composer require henryejemuta/php-clubkash-vtu
 ### Initialization
 
 To start using the package, initialize the `Client` with your UserID, API Key, and optional configuration.
+You can also pass an existing `token` if available to skip initial authentication.
 
 ```php
 use HenryEjemuta\Clubkash\Client;
 
 $config = [
-    'timeout' => 30, // Optional: Request timeout in seconds
+    'timeout' => 30,
+    // 'token' => 'YOUR_CACHED_TOKEN', // Optional: Reuse valid token
 ];
 
 $client = new Client('YOUR_USER_ID', 'YOUR_API_KEY', $config);
+```
+
+### Authentication (Token Generation)
+
+The API supports token-based authentication. Tokens are valid for 7 days.
+It is recommended to cache the token and reuse it.
+
+```php
+// Authenticate to get a new token
+$authResponse = $client->authenticate();
+if (isset($authResponse['token'])) {
+    $token = $authResponse['token'];
+    // Store $token in your database/cache with expiry
+}
 ```
 
 ### Check Wallet Balance

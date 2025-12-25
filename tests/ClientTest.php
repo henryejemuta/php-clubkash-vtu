@@ -110,6 +110,42 @@ class ClientTest extends TestCase
         $this->assertStringContainsString('SmartCardNo=1234567890', $query);
     }
 
+    public function testAuthenticate()
+    {
+        $client = $this->createClient();
+        $this->mockHandler->append(new Response(200, [], json_encode(['token' => 'NEW_ACCESS_TOKEN', 'expires_in' => 604800]))); // 7 days
+
+        $result = $client->authenticate();
+
+        $this->assertIsArray($result);
+        $this->assertEquals('NEW_ACCESS_TOKEN', $result['token']);
+
+        // Verify request was made to APIToken.asp (or whatever we chose)
+        $request = $this->container[0]['request'];
+        $this->assertStringContainsString('APIToken.asp', $request->getUri()->getPath());
+    }
+
+    public function testRequestWithToken()
+    {
+        // Initialize client WITH a token
+        $client = $this->createClient(['token' => 'EXISTING_TOKEN']);
+        
+        $this->mockHandler->append(new Response(200, [], json_encode(['balance' => 500.00])));
+
+        $client->getWalletBalance();
+
+        $request = $this->container[0]['request'];
+        
+        // Verify Authorization header is present
+        $this->assertTrue($request->hasHeader('Authorization'));
+        $this->assertEquals('Bearer EXISTING_TOKEN', $request->getHeaderLine('Authorization'));
+        
+        // Verify UserID/APIKey are NOT in query params (since we prioritize token)
+        $query = $request->getUri()->getQuery();
+        $this->assertStringNotContainsString('UserID=', $query);
+        $this->assertStringNotContainsString('APIKey=', $query);
+    }
+
     public function testPurchaseElectricity()
     {
         $client = $this->createClient();

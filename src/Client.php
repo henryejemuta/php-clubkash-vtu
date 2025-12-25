@@ -12,16 +12,13 @@ class Client
      * @var string
      */
     private $userID;
-
-    /**
-     * @var string
-     */
     private $apiKey;
+    private $httpClient;
 
     /**
-     * @var GuzzleClient
+     * @var string|null
      */
-    private $httpClient;
+    private $token;
 
     /**
      * Client constructor.
@@ -34,6 +31,7 @@ class Client
     {
         $this->userID = $userID;
         $this->apiKey = $apiKey;
+        $this->token = $config['token'] ?? null; // Allow passing token in config
 
         $baseUrl = $config['base_url'] ?? self::BASE_URL;
         // Ensure base URL ends with a slash
@@ -59,6 +57,28 @@ class Client
     }
 
     /**
+     * Authenticate and generate a new token.
+     * Note: Token expires after 7 days.
+     *
+     * @return array
+     * @throws ClubkashException
+     */
+    public function authenticate(): array
+    {
+        // Placeholder for authentication endpoint
+        $response = $this->request('GET', 'APIToken.asp', [
+             'username' => $this->userID,
+             'apikey' => $this->apiKey
+        ]);
+
+        if (isset($response['token'])) {
+            $this->token = $response['token'];
+        }
+
+        return $response;
+    }
+
+    /**
      * Make a request to the API.
      * 
      * @param string $method
@@ -69,35 +89,31 @@ class Client
      */
     private function request(string $method, string $endpoint, array $params = []): array
     {
-        // Add auth credentials to every request
-        $params['UserID'] = $this->userID;
-        $params['APIKey'] = $this->apiKey;
+        $options = [];
+
+        // Use token if available, otherwise fallback to UserID/APIKey
+        if ($this->token) {
+             $options['headers']['Authorization'] = 'Bearer ' . $this->token;
+        } else {
+             $params['UserID'] = $this->userID;
+             $params['APIKey'] = $this->apiKey;
+        }
+
+        if (strtoupper($method) === 'GET') {
+            $options['query'] = $params;
+        } else {
+            $options['query'] = $params;
+        }
 
         try {
-            $options = [];
-            if (strtoupper($method) === 'GET') {
-                $options['query'] = $params;
-            } else {
-                // For POST/PUT, documentation implies functionality usually via params or body.
-                // Assuming query params for now as per research "utilize the HTTP GET method".
-                // But if POST is needed, we might need 'form_params' or 'json'.
-                // Research said: "All endpoints ... utilize the HTTP GET method".
-                // So strictly GET.
-                $options['query'] = $params;
-            }
-
             $response = $this->httpClient->request($method, $endpoint, $options);
             $content = $response->getBody()->getContents();
             $data = json_decode($content, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
-                // Some APIs return plain text on error or success, check for that?
-                // For now throw exception
                 throw new ClubkashException('Failed to decode JSON response: ' . $content);
             }
 
-            // Check API specific error codes if structure allows.
-            // Usually valid JSON is returned.
             return $data;
 
         } catch (\GuzzleHttp\Exception\GuzzleException $e) {
