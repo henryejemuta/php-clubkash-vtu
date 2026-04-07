@@ -7,7 +7,7 @@ use GuzzleHttp\Client as GuzzleClient;
 class Client
 {
     private const BASE_URL = 'https://www.nellobytesystems.com/';
-    
+
     /**
      * @var string
      */
@@ -40,7 +40,7 @@ class Client
         }
 
         $timeout = $config['timeout'] ?? 30;
-        
+
         $guzzleConfig = [
             'base_uri' => $baseUrl,
             'timeout' => $timeout,
@@ -48,7 +48,7 @@ class Client
                 'Accept' => 'application/json',
             ],
         ];
-        
+
         if (isset($config['handler'])) {
             $guzzleConfig['handler'] = $config['handler'];
         }
@@ -67,8 +67,8 @@ class Client
     {
         // Placeholder for authentication endpoint
         $response = $this->request('GET', 'APIToken.asp', [
-             'username' => $this->userID,
-             'apikey' => $this->apiKey
+            'username' => $this->userID,
+            'apikey' => $this->apiKey
         ]);
 
         if (isset($response['token'])) {
@@ -92,12 +92,8 @@ class Client
         $options = [];
 
         // Use token if available, otherwise fallback to UserID/APIKey
-        if ($this->token) {
-             $options['headers']['Authorization'] = 'Bearer ' . $this->token;
-        } else {
-             $params['UserID'] = $this->userID;
-             $params['APIKey'] = $this->apiKey;
-        }
+        $params['UserID'] = $this->userID;
+        $params['APIKey'] = $this->apiKey;
 
         if (strtoupper($method) === 'GET') {
             $options['query'] = $params;
