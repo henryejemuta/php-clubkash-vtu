@@ -10,12 +10,12 @@ A robust PHP package for integrating with the ClubKash (Nellobytes Systems) VTU 
 
 ## Features
 
--   **Airtime Purchase**: Buy airtime for all major Nigerian networks.
--   **Data Purchase**: Buy data bundles for all major Nigerian networks.
--   **Cable TV Subscription**: Subscribe to DSTV, GOTV, and Startimes.
--   **Electricity Bill Payment**: Pay for prepaid and postpaid electricity meters.
--   **Wallet Balance**: Check your wallet balance.
--   **Universal Compatibility**: Works with Laravel, CodeIgniter, Symfony, and raw PHP projects.
+- **Airtime Purchase**: Buy airtime for all major Nigerian networks.
+- **Data Purchase**: Buy data bundles for all major Nigerian networks.
+- **Cable TV Subscription**: Subscribe to DSTV, GOTV, and Startimes.
+- **Electricity Bill Payment**: Pay for prepaid and postpaid electricity meters.
+- **Wallet Balance**: Check your wallet balance.
+- **Universal Compatibility**: Works with Laravel, CodeIgniter, Symfony, and raw PHP projects.
 
 ## Installation
 
@@ -37,24 +37,9 @@ use HenryEjemuta\Clubkash\Client;
 
 $config = [
     'timeout' => 30,
-    // 'token' => 'YOUR_CACHED_TOKEN', // Optional: Reuse valid token
 ];
 
 $client = new Client('YOUR_USER_ID', 'YOUR_API_KEY', $config);
-```
-
-### Authentication (Token Generation)
-
-The API supports token-based authentication. Tokens are valid for 7 days.
-It is recommended to cache the token and reuse it.
-
-```php
-// Authenticate to get a new token
-$authResponse = $client->authenticate();
-if (isset($authResponse['token'])) {
-    $token = $authResponse['token'];
-    // Store $token in your database/cache with expiry
-}
 ```
 
 ### Check Wallet Balance

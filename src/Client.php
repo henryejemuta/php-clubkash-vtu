@@ -31,7 +31,6 @@ class Client
     {
         $this->userID = $userID;
         $this->apiKey = $apiKey;
-        $this->token = $config['token'] ?? null; // Allow passing token in config
 
         $baseUrl = $config['base_url'] ?? self::BASE_URL;
         // Ensure base URL ends with a slash
@@ -46,6 +45,7 @@ class Client
             'timeout' => $timeout,
             'headers' => [
                 'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
             ],
         ];
 
@@ -54,28 +54,6 @@ class Client
         }
 
         $this->httpClient = new GuzzleClient($guzzleConfig);
-    }
-
-    /**
-     * Authenticate and generate a new token.
-     * Note: Token expires after 7 days.
-     *
-     * @return array
-     * @throws ClubkashException
-     */
-    public function authenticate(): array
-    {
-        // Placeholder for authentication endpoint
-        $response = $this->request('GET', 'APIToken.asp', [
-            'username' => $this->userID,
-            'apikey' => $this->apiKey
-        ]);
-
-        if (isset($response['token'])) {
-            $this->token = $response['token'];
-        }
-
-        return $response;
     }
 
     /**
